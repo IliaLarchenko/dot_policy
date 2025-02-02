@@ -1,5 +1,7 @@
 # Decoder Only Transformer Policy - simple but powerful model for behavioral cloning
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14789259.svg)](https://doi.org/10.5281/zenodo.14789259)
+
 ## Table of Contents
 - [Summary](#summary)
 - [How to use the model](#how-to-use-the-model)
@@ -476,8 +478,7 @@ It is not a scientific paper but you can cite this page if you find it useful us
     title = {Decoder Only Transformer Policy - simple but powerful model for behavioral cloning},
     year = {2025},
     publisher = {Zenodo},
-    doi = {XXX/zenodo.XXX},
-    url = {https://doi.org/XXX/zenodo.XXX},
+    doi = {10.5281/zenodo.14789259},
+    url = {https://doi.org/10.5281/zenodo.14789259},
     note = {GitHub repository: \url{https://github.com/IliaLarchenko/dot_policy}}
 }
-```

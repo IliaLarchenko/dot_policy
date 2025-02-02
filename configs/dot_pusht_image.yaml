@@ -1,0 +1,114 @@
+# @package _global_
+
+# You need to change some parameters in this configuration file to make it work for your problem.
+
+# Data specification - need to be changed:
+# - `dataset_repo_id`: the dataset repository ID.
+# - 'override_dataset_stats': the dataset statistics if you need to override them.
+# - `policy.input_shapes`: the input shapes of the policy.
+# - `policy.output_shapes`: the output shapes of the policy.
+# - `policy.input_normalization_modes`: the normalization modes for the inputs.
+# - `policy.output_normalization_modes`: the normalization modes for the outputs.
+
+# FPS/prediction horizon related features - may need to adjust:
+# - `policy.train_horizon`: the number of steps to predict in the future during the training.
+# - `policy.inference_horizon`: the number of steps to predict in the future during the validation.
+# - `policy.alpha`: the exponential factor for the weight of each next action.
+# - `policy.train_alpha`: the exponential factor for the weight of each next action during training.
+
+# If you want to speed up the inference or actual action you can adjust the following:
+# - `policy.predict_every_n`: the number of frames to predict in the future.
+# - `policy.return_every_n`: instead of returning the next predicted actions, returns nth action in the future.
+
+# You can also change any other parameters but default ones should generally work well.
+
+seed: 100000
+
+dataset_repo_id: lerobot/pusht
+
+override_dataset_stats:
+  observation.image:
+    mean: [[[0.485]], [[0.456]], [[0.406]]]  # (c,1,1)
+    std: [[[0.229]], [[0.224]], [[0.225]]]  # (c,1,1)
+  observation.state:
+    min: [0.0, 0.0]
+    max: [512.0, 512.0]
+  action:
+    min: [0.0, 0.0]
+    max: [512.0, 512.0]
+
+training:
+  offline_steps: 1000000
+  online_steps: 0
+  eval_freq: 10000
+  save_freq: 50000
+  log_freq: 1000
+  save_model: true
+
+  batch_size: 24
+  grad_clip_norm: 50
+  lr: 1.0e-4
+  min_lr: 1.0e-4
+  lr_cycle_steps: 300000 # doesn't matter here as min_lr == lr
+  weight_decay: 1.0e-5
+  online_steps_between_rollouts: 1
+
+  delta_timestamps:
+    observation.image: "[(-${policy.lookback_obs_steps} + i) / ${fps} for i in range(-${policy.lookback_aug}, ${policy.lookback_aug} + 1)] + [i / ${fps} for i in range(2 - ${policy.n_obs_steps}, 1)]"
+    observation.state: "[(-${policy.lookback_obs_steps} + i) / ${fps} for i in range(-${policy.lookback_aug}, ${policy.lookback_aug} + 1)] + [i / ${fps} for i in range(2 - ${policy.n_obs_steps}, 1)]"
+    action: "[(-${policy.lookback_obs_steps} + i) / ${fps} for i in range(-${policy.lookback_aug}, ${policy.lookback_aug} + 1)] + [i / ${fps} for i in range(2 - ${policy.n_obs_steps}, ${policy.train_horizon})]"
+
+eval:
+  n_episodes: 100
+  batch_size: 100
+
+# See `configuration_dot.py` for more details.
+policy:
+  name: dot
+
+  # Input / output structure.
+  n_obs_steps: 3
+  train_horizon: 20 # 2 seconds
+  inference_horizon: 20 # 2 seconds
+  lookback_obs_steps: 10 # 1 second
+  lookback_aug: 5 # 0.5 seconds
+
+  input_shapes:
+    observation.image: [3, 96, 96]
+    observation.state: ["${env.state_dim}"]
+  output_shapes:
+    action: ["${env.action_dim}"]
+
+  # Normalization
+  input_normalization_modes:
+    observation.image: mean_std
+    observation.state: min_max
+  output_normalization_modes:
+    action: min_max
+
+  # Architecture.
+  # Vision backbone.
+  vision_backbone: resnet18
+  pretrained_backbone_weights: ResNet18_Weights.IMAGENET1K_V1
+  rescale_shape: [96, 96]
+  lora_rank: 20
+  merge_lora: false # Merge LoRA with the backbone when weights are loaded
+
+  # Augmentations
+  crop_scale: 0.8
+  state_noise: 0.01
+  noise_decay: 0.999995 # augmentations decay factor
+
+  # Transformer layers.
+  pre_norm: true
+  dim_model: 128
+  n_heads: 8
+  dim_feedforward: 512
+  n_decoder_layers: 8
+
+  # Others
+  dropout: 0.1
+  alpha: 0.75
+  train_alpha: 0.9
+  predict_every_n: 1
+  return_every_n: 1

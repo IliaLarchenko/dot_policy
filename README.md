@@ -54,7 +54,7 @@ The provided brunch already contains yaml config files to reproduce the results 
 
 ```
 python lerobot/scripts/train.py policy=dot_pusht_image env=pusht
-python lerobot/scripts/train.py policy=dot_pusht_keypoints env=pusht env.obs_type=environment_state_agent_pos
+python lerobot/scripts/train.py policy=dot_pusht_keypoints env=pusht env.gym.obs_type=environment_state_agent_pos
 python lerobot/scripts/train.py policy=dot_insert env=aloha env.episode_length=500
 ```
 

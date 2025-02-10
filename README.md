@@ -5,8 +5,7 @@
 ## Table of Contents
 - [Summary](#summary)
 - [How to use the model](#how-to-use-the-model)
-  - [Reproduce the results](#reproduce-the-results)
-  - [Validate the results](#validate-the-results)
+  - [Reproduce and validate the results](#reproduce-and-validate-the-results)
 - [Problem introduction](#problem-introduction)
   - [PushT](#pusht)
   - [ALOHA insertion](#aloha-insertion)
@@ -44,28 +43,13 @@ It is not a formal paper but rather experiments results and thoughts sharing so,
 
 ## How to use the model
 
-The policy is implemented using LeRobot library and it is required to run the code from this repository. For simplicity you can use this branch https://github.com/IliaLarchenko/lerobot/tree/dot to reproduce results presented on this page or try DOT-Policy for you problems.
-LeRobot has recently released a big change in the usage of config files without backward compatibility (I made this fork right before it), so you need to use my fork to reproduce the results. I will try to update the code to the latest version of the library in the nearest future.
+The policy is implemented using LeRobot library and it is required to run the code from this repository. For simplicity you can use this branch https://github.com/IliaLarchenko/lerobot/tree/dot_new_config to reproduce results presented on this page or try DOT-Policy for you problems.
+
+LeRobot has recently released a big change in the usage of config files without backward compatibility. I conducted most of my experiments before this change (using [this branch](https://github.com/IliaLarchenko/lerobot/tree/dot)). All yaml files and original code in this repository were used in the old version of the library. But the latest version of the code and all commands in this document are adapted for the new version of the library.
 
 To start install the library from the branch following the original instructions.
 
-### Reproduce the results
-The provided brunch already contains yaml config files to reproduce the results for all the problems. Just run one of the following commands to train the model for the particular problem:
-
-```
-python lerobot/scripts/train.py policy=dot_pusht_image env=pusht
-python lerobot/scripts/train.py policy=dot_pusht_keypoints env=pusht env.gym.obs_type=environment_state_agent_pos
-python lerobot/scripts/train.py policy=dot_insert env=aloha env.episode_length=500
-```
-
-You can provide extra parameters to the command just follow the original instructions. I usually use some extra params like this:
-
-```
-hydra.run.dir=outputs/train/run_name hydra.job.name=run_name wandb.enable=true wandb.project=project_name training.num_workers=24 use_amp=true
-```
-
-### Validate the results
-
+### Reproduce and validate the results
 I provide the pretrained models for all 3 problems on the Hugging Face hub.
 
 https://huggingface.co/IliaLarchenko/dot_pusht_keypoints
@@ -74,13 +58,21 @@ https://huggingface.co/IliaLarchenko/dot_pusht_images
 
 https://huggingface.co/IliaLarchenko/dot_bimanual_insert
 
-To validate the results use the original LeRobot evaluation script:
+
+To train any model use:
 
 ```bash
-python lerobot/scripts/eval.py -p IliaLarchenko/dot_pusht_keypoints eval.n_episodes=1000 eval.batch_size=100 seed=1000000
+python lerobot/scripts/train.py ...
 ```
 
-Note: `eval.py` script is loading model weights 2 times, so you should set `merge_lora=false` in the config file to prevent an error.
+To evaluate the model use:
+
+```bash
+python lerobot/scripts/eval.py ...
+```
+
+The whole train and eval commands with used parameters are provided in the model cards on the Hugging Face hub.
+
 
 ## Problem introduction
 
